@@ -106,6 +106,9 @@ namespace Piller.Droid.Views
 			this.MenuInflater.Inflate(Resource.Menu.dosagemenu, menu);
 			var saveItem = menu.FindItem(Resource.Id.action_save);
 
+            // Przycisk bedzie aktywny tylko, kiedy mozna zapisac
+            this.ViewModel.Save.CanExecute.Subscribe(canExecute => saveItem.SetEnabled(canExecute));
+
 			return base.OnCreateOptionsMenu(menu);
 		}
 
