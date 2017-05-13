@@ -9,12 +9,14 @@ using Acr.UserDialogs;
 using Piller.Resources;
 using ReactiveUI;
 using MvvmCross.Plugins.Messenger;
+using System.Threading.Tasks;
 
 namespace Piller.ViewModels
 {
     public class MedicationDosageViewModel : MvxViewModel
     {
         private IPermanentStorageService storage = Mvx.Resolve<IPermanentStorageService>();
+        private INotificationService notificationService = Mvx.Resolve<INotificationService>();
 
         //identyfikator rekordu, uzywany w trybie edycji
         private int? id;
@@ -123,6 +125,8 @@ namespace Piller.ViewModels
 
             this.Save = RxUI.ReactiveCommand.CreateFromTask<Unit, bool>(async _ =>
             {
+                if (this.Id.HasValue)
+                    await this.ClearNotification();
 
                 var dataRecord = new MedicationDosage
                 {
@@ -142,6 +146,13 @@ namespace Piller.ViewModels
 
                 await this.storage.SaveAsync<MedicationDosage>(dataRecord);
 
+                var notificationsIDs = await this.notificationService.ScheduleNotification(dataRecord);
+                
+                // Zapis listy id powiadomien
+                dataRecord.NotificationsIds = notificationsIDs;
+                await this.storage.SaveAsync<MedicationDosage>(dataRecord);
+
+
                 return true;
             }, canSave);
 
@@ -151,6 +162,7 @@ namespace Piller.ViewModels
                {
                    if (this.Id.HasValue)
                    {
+                       await this.ClearNotification();
                        await this.storage.DeleteByKeyAsync<MedicationDosage>(this.Id.Value);
                        return true;
                    }
@@ -191,6 +203,11 @@ namespace Piller.ViewModels
                 });
         }
 
+        private async Task ClearNotification()
+        {
+            MedicationDosage item = await storage.GetAsync<MedicationDosage>(this.Id.Value);
+            notificationService.CancelNotifications(item.NotificationsIds);
+        }
 
         public async void Init(MedicationDosageNavigation nav)
         {
@@ -211,5 +228,6 @@ namespace Piller.ViewModels
             }
       
         }
+
     }
 }

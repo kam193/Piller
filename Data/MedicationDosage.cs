@@ -40,5 +40,28 @@ namespace Piller.Data
             }
 
         }
+
+        public string notificationIdsEncoded { get; set; }
+
+        /// <summary>
+        /// Lista z ID utworzonych notyfikacji
+        /// </summary>
+        [Ignore]
+        public IEnumerable<int> NotificationsIds
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(notificationIdsEncoded))
+                    return new List<int>();
+                return notificationIdsEncoded.Split(';').Select(enc => int.Parse(enc));
+            }
+            set
+            {
+                if (value == null)
+                    notificationIdsEncoded = null;
+                else
+                    notificationIdsEncoded = string.Join(";", value.Select(i => i.ToString()));
+            }
+        }
     }
 }

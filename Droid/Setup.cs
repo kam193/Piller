@@ -5,6 +5,8 @@ using MvvmCross.Platform.Platform;
 using MvvmCross.Droid.Shared.Presenter;
 using MvvmCross.Droid.Views;
 using MvvmCross.Platform;
+using Piller.Services;
+using Piller.Droid.Services;
 
 namespace Piller.Droid
 {
@@ -29,7 +31,12 @@ namespace Piller.Droid
             var mvxFragmentsPresenter = new MvxFragmentsPresenter(AndroidViewAssemblies);
             Mvx.RegisterSingleton<IMvxAndroidViewPresenter>(mvxFragmentsPresenter);
             return mvxFragmentsPresenter;
+        }
 
+        protected override void InitializeIoC()
+        {
+            base.InitializeIoC();
+            Mvx.RegisterSingleton<INotificationService>(new AndroidNotificationService(this.ApplicationContext));
         }
     }
 }
